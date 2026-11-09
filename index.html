@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#10131b">
+<meta name="description" content="AI Motion Studio Automator untuk Android">
+<link rel="manifest" href="./manifest.webmanifest">
+<title>AI Motion Studio Automator</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0e14;--panel:#151a24;--panel2:#1d2431;--line:#30394a;--txt:#f2f5fb;--muted:#a8b2c4;--accent:#9b8cff;--good:#7bd6ad;--warn:#ffd27a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{position:sticky;top:0;z-index:5;background:#10131bf2;backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:14px 16px}
+h1{font-size:18px;margin:0}header p{margin:3px 0 0;color:var(--muted);font-size:12px}
+main{max-width:980px;margin:auto;padding:14px 14px 90px}.tabs{display:flex;gap:7px;overflow:auto;padding:8px 0 14px}
+button,.tab{border:1px solid var(--line);background:var(--panel2);color:var(--txt);border-radius:11px;padding:10px 12px;font-weight:650;cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#171329}
+button.ghost{background:transparent}button.danger{border-color:#74434a;color:#ffb7bd}
+.tab.active{background:var(--accent);color:#171329;border-color:var(--accent)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;margin:0 0 13px}
+h2{font-size:16px;margin:0 0 12px}h3{font-size:14px;margin:12px 0 7px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
+label{display:block;font-size:12px;color:var(--muted);margin:0 0 5px}
+input,select,textarea{width:100%;border:1px solid var(--line);border-radius:10px;background:#0d1119;color:var(--txt);padding:11px;font:inherit;min-width:0}
+textarea{min-height:88px;resize:vertical}input[type=file]{padding:8px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.muted{color:var(--muted);font-size:12px}.good{color:var(--good)}.warn{color:var(--warn)}
+.hidden{display:none!important}.pill{display:inline-block;border:1px solid var(--line);padding:3px 8px;border-radius:99px;color:var(--muted);font-size:11px}
+.scene{border:1px solid var(--line);padding:10px;border-radius:12px;margin:9px 0;background:#111722}
+.scene textarea{min-height:72px}.row{display:flex;gap:8px;align-items:center;justify-content:space-between}
+.progress{height:7px;background:#30394a;border-radius:99px;overflow:hidden}.progress span{display:block;height:100%;background:var(--accent);width:0}
+small{color:var(--muted)}.notice{border-left:3px solid var(--warn);padding:8px 10px;background:#282318;border-radius:6px;font-size:12px}
+footer{position:fixed;bottom:0;left:0;right:0;background:#10131bf2;border-top:1px solid var(--line);padding:9px 14px;text-align:center;color:var(--muted);font-size:11px}
+@media(max-width:560px){.grid{grid-template-columns:1fr}.full{grid-column:auto}button{padding:10px}}
+</style>
+</head>
+<body>
+<header><h1>🎬 AI Motion Studio Automator</h1><p>Android PWA · Flow-first · Penyimpanan lokal di perangkat</p></header>
+<main>
+<nav class="tabs" aria-label="Menu">
+<button class="tab active" data-tab="home">Dashboard</button>
+<button class="tab" data-tab="ugc">UGC Studio</button>
+<button class="tab" data-tab="youtube">YouTube Long</button>
+<button class="tab" data-tab="motion">Motion Control</button>
+<button class="tab" data-tab="flow">Akun Flow</button>
+<button class="tab" data-tab="export">Impor & Ekspor</button>
+</nav>
+
+<section id="home" class="page">
+<div class="card">
+<h2>Proyek baru</h2>
+<div class="grid">
+<div><label>Nama proyek</label><input id="projectName" placeholder="Contoh: Review skincare 30 detik"></div>
+<div><label>Jenis proyek</label><select id="projectType"><option value="UGC">UGC Studio</option><option value="YouTube">YouTube Long-form</option><option value="Motion Control">Motion Control</option></select></div>
+<div><label>Format video</label><select id="projectFormat"><option value="9:16">Vertikal 9:16 (TikTok/Reels/Shorts)</option><option value="16:9">Horizontal 16:9 (YouTube)</option></select></div>
+<div><label>Durasi target</label><select id="projectDuration"><option value="30 detik">30 detik</option><option value="60 detik">60 detik</option><option value="3 menit">3 menit</option><option value="5 menit">5 menit</option><option value="8 menit">8 menit</option><option value="10 menit">10 menit</option></select></div>
+<div class="full"><label>Ide / topik</label><textarea id="projectIdea" placeholder="Tuliskan ide video, produk, pesan utama, audiens, atau gerakan yang diinginkan"></textarea></div>
+</div>
+<div class="actions"><button class="primary" id="createProject">Buat proyek</button><button class="ghost" id="exportBackup">Cadangkan data JSON</button><label class="ghost" style="margin:0"><input type="file" id="importBackup" accept=".json,application/json" hidden> <span class="pill">Impor cadangan JSON</span></label></div>
+</div>
+<div class="card"><div class="row"><h2>Proyek tersimpan</h2><span class="pill" id="projectCount">0 proyek</span></div><div id="projectList" class="muted">Belum ada proyek. Buat proyek pertama di atas.</div></div>
+<div class="card"><h2>Alur kerja otomatis</h2>
+<div class="muted">1. Buat proyek → 2. Susun scene & prompt → 3. Pilih akun Flow → 4. Buka Flow dan generate manual → 5. Impor klip → 6. Gabungkan & ekspor.</div>
+<p class="notice">PWA ini mengotomatiskan perencanaan, prompt, antrean, pencatatan akun, dan penggabungan klip. Interaksi Generate tetap dilakukan di situs resmi Flow. Jangan masukkan password atau kode keamanan akun ke aplikasi ini.</p>
+</div>
+</section>
+
+<section id="ugc" class="page hidden">
+<div class="card"><h2>UGC Studio</h2><div class="grid">
+<div><label>Produk / layanan</label><input id="ugcProduct" placeholder="Nama produk dan kategori"></div>
+<div><label>Gaya konten</label><select id="ugcStyle"><option>Review jujur</option><option>Unboxing</option><option>Demo produk</option><option>Problem-solution</option><option>Testimoni / pengalaman</option><option>Soft selling</option></select></div>
+<div><label>Target audiens</label><input id="ugcAudience" placeholder="Contoh: mahasiswa usia 18–25"></div>
+<div><label>Durasi</label><select id="ugcDuration"><option>30 detik</option><option>45 detik</option><option>60 detik</option><option>90 detik</option></select></div>
+<div class="full"><label>Keunggulan & CTA</label><textarea id="ugcBenefits" placeholder="Manfaat utama, bukti yang boleh diklaim, dan ajakan bertindak"></textarea></div>
+</div><div class="actions"><button class="primary" id="makeUgc">Buat naskah + storyboard</button></div></div>
+<div class="card hidden" id="ugcOutput"><h2>Hasil UGC</h2><div id="ugcScript"></div><div id="ugcScenes"></div><div class="actions"><button id="copyUgc">Salin seluruh prompt</button><button class="ghost" id="saveUgc">Simpan ke proyek aktif</button></div></div>
+</section>
+
+<section id="youtube" class="page hidden">
+<div class="card"><h2>YouTube Long-form Studio</h2><div class="grid">
+<div><label>Topik video</label><input id="ytTopic" placeholder="Contoh: Sejarah teknologi AI"></div>
+<div><label>Target durasi</label><select id="ytDuration"><option>5 menit</option><option>8 menit</option><option>10 menit</option><option>15 menit</option><option>20 menit</option></select></div>
+<div><label>Gaya penyampaian</label><select id="ytTone"><option>Edukasi santai</option><option>Dokumenter</option><option>Storytelling</option><option>Listicle / Top 10</option><option>Review mendalam</option></select></div>
+<div><label>Format visual</label><select id="ytFormat"><option>16:9 horizontal</option><option>9:16 vertikal</option></select></div>
+<div class="full"><label>Audiens & poin wajib</label><textarea id="ytNotes" placeholder="Siapa penonton dan apa saja poin yang wajib dibahas"></textarea></div>
+</div><div class="actions"><button class="primary" id="makeYt">Buat outline + scene visual</button></div></div>
+<div class="card hidden" id="ytOutput"><h2>Outline & scene</h2><div id="ytScript"></div><div id="ytScenes"></div><div class="actions"><button id="copyYt">Salin seluruh prompt</button><button class="ghost" id="saveYt">Simpan ke proyek aktif</button></div></div>
+</section>
+
+<section id="motion" class="page hidden">
+<div class="card"><h2>Motion Control Studio</h2><div class="grid">
+<div><label>Subjek / karakter</label><input id="mcSubject" placeholder="Contoh: karakter perempuan virtual, pakaian streetwear"></div>
+<div><label>Gerakan referensi</label><input id="mcMove" placeholder="Contoh: dance trend, gerakan tangan, berjalan"></div>
+<div><label>Rasio</label><select id="mcRatio"><option>9:16 vertikal</option><option>16:9 horizontal</option></select></div>
+<div><label>Durasi klip</label><select id="mcLength"><option>5 detik</option><option>8 detik</option><option>10 detik</option><option>15 detik</option></select></div>
+<div class="full"><label>Background & kamera</label><textarea id="mcScene" placeholder="Contoh: kamar minimalis, kamera statis full body, pencahayaan lembut"></textarea></div>
+<div class="full"><label>Catatan konsistensi</label><textarea id="mcConsistency" placeholder="Wajah, rambut, pakaian, proporsi, dan identitas karakter harus konsisten"></textarea></div>
+</div><div class="actions"><button class="primary" id="makeMotion">Buat prompt motion control</button></div></div>
+<div class="card hidden" id="motionOutput"><h2>Prompt Motion Control</h2><textarea id="motionPrompt"></textarea><p class="muted">Gunakan gambar karakter sebagai source image dan video gerakan sebagai motion reference pada tool yang mendukung motion transfer. Prompt teks saja tidak menggantikan model motion-control.</p><div class="actions"><button id="copyMotion">Salin prompt</button><button class="ghost" id="saveMotion">Simpan ke proyek aktif</button></div></div>
+</section>
+
+<section id="flow" class="page hidden">
+<div class="card"><h2>Manajer 3 akun Google Flow</h2><p class="muted">Isi label akun dan catatan kuota sendiri. Aplikasi tidak membaca saldo kredit Flow dan tidak menggabungkan kuota antar-akun.</p>
+<div id="accounts"></div>
+<div class="actions"><button class="primary" id="saveAccounts">Simpan akun</button><button id="openFlow">Buka Google Flow</button></div>
+<p class="notice">Pilih akun sebelum membuka Flow. Login dan verifikasi tetap berlangsung di halaman resmi Google. Jangan simpan password, cookie, token, atau recovery code di sini.</p>
+</div>
+<div class="card"><h2>Antrean produksi</h2><div id="queueList" class="muted">Belum ada prompt dalam antrean.</div></div>
+</section>
+
+<section id="export" class="page hidden">
+<div class="card"><h2>Impor klip hasil generasi</h2><p class="muted">Pilih beberapa klip video dari perangkat. Urutkan sebelum ekspor dengan tombol naik/turun.</p>
+<input id="clipsInput" type="file" accept="video/*" multiple>
+<div id="clipList"></div>
+<div class="grid" style="margin-top:12px">
+<div><label>Ukuran keluaran</label><select id="exportRatio"><option value="720x1280">Vertikal 9:16 – 720×1280</option><option value="1280x720">Horizontal 16:9 – 1280×720</option></select></div>
+<div><label>Nama file</label><input id="exportName" value="hasil-ai-motion-studio.mp4"></div>
+</div>
+<div class="actions"><button class="primary" id="mergeClips">Gabungkan & ekspor MP4</button><button id="clearClips" class="danger">Kosongkan daftar</button></div>
+<div id="exportStatus" class="muted" style="margin-top:10px"></div><div class="progress" style="margin-top:8px"><span id="exportProgress"></span></div>
+</div>
+<div class="card"><h2>Catatan ekspor</h2><p class="muted">Penggabungan menggunakan FFmpeg WebAssembly dari CDN dan memproses video di browser. Untuk menjaga kompatibilitas, versi awal mengekspor video tanpa audio. Klip panjang/resolusi tinggi bisa kehabisan memori di HP; coba klip pendek atau resolusi lebih rendah bila gagal. File asli tidak diubah.</p></div>
+</section>
+</main>
+<footer>AI Motion Studio Automator · Data proyek tersimpan di browser perangkat ini</footer>
+<script type="module">
+const $ = id => document.getElementById(id);
+const STORE='aimotionstudio_v1';
+let state={projects:[],accounts:[{label:'Flow Akun 1',note:'',used:''},{label:'Flow Akun 2',note:'',used:''},{label:'Flow Akun 3',note:'',used:''}],selectedAccount:0,queue:[],activeProject:null};
+let generated={ugc:null,yt:null,motion:null};
+let clips=[];
+function load(){try{const x=JSON.parse(localStorage.getItem(STORE)||'null');if(x)state={...state,...x}}catch(e){console.warn(e)}}
+function save(){localStorage.setItem(STORE,JSON.stringify(state));renderProjects();renderQueue()}
+function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function active(){return state.projects.find(p=>p.id===state.activeProject)}
+function setTab(name){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('hidden',p.id!==name));document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name))}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+function renderProjects(){
+ $('projectCount').textContent=`${state.projects.length} proyek`;
+ $('projectList').innerHTML=state.projects.length?state.projects.map(p=>`<div class="scene"><div class="row"><strong>${esc(p.name)}</strong><span class="pill">${esc(p.type)} · ${esc(p.format)}</span></div><p class="muted">${esc(p.idea||'Tanpa deskripsi')} · ${esc(p.duration)}</p><div class="actions"><button data-open="${p.id}">Jadikan aktif</button><button class="danger" data-del="${p.id}">Hapus</button></div></div>`).join(''):'Belum ada proyek. Buat proyek pertama di atas.';
+ document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{state.activeProject=b.dataset.open;save();alert('Proyek aktif: '+(active()?.name||''))});
+ document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(confirm('Hapus proyek ini?')){state.projects=state.projects.filter(p=>p.id!==b.dataset.del);if(state.activeProject===b.dataset.del)state.activeProject=null;save()}});
+}
+$('createProject').onclick=()=>{const name=$('projectName').value.trim();if(!name)return alert('Isi nama proyek dulu.');const p={id:crypto.randomUUID(),name,type:$('projectType').value,format:$('projectFormat').value,duration:$('projectDuration').value,idea:$('projectIdea').value,created:new Date().toISOString(),scenes:[]};state.projects.unshift(p);state.activeProject=p.id;save();alert('Proyek dibuat dan dipilih sebagai proyek aktif.')};
+function renderAccounts(){
+ $('accounts').innerHTML=state.accounts.map((a,i)=>`<div class="scene"><div class="row"><strong>Slot akun ${i+1}</strong><label><input type="radio" name="selectedAccount" value="${i}" ${state.selectedAccount===i?'checked':''} style="width:auto"> Aktif</label></div><div class="grid"><div><label>Label akun (bukan password)</label><input data-label="${i}" value="${esc(a.label)}"></div><div><label>Catatan kuota / pemakaian manual</label><input data-used="${i}" value="${esc(a.used||'')}" placeholder="Contoh: kredit tersisa menurut dashboard"></div><div class="full"><label>Catatan</label><input data-note="${i}" value="${esc(a.note||'')}" placeholder="Catatan pemilik / status akun"></div></div></div>`).join('');
+ document.querySelectorAll('[name=selectedAccount]').forEach(r=>r.onchange=()=>state.selectedAccount=Number(r.value));
+}
+$('saveAccounts').onclick=()=>{state.accounts=state.accounts.map((a,i)=>({label:$(`[data-label="${i}"]`).value,note:$(`[data-note="${i}"]`).value,used:$(`[data-used="${i}"]`).value}));save();alert('Catatan akun tersimpan.')};
+$('openFlow').onclick=()=>window.open('https://labs.google/fx/tools/flow','_blank','noopener');
+function renderQueue(){$('queueList').innerHTML=state.queue.length?state.queue.map((q,i)=>`<div class="scene"><div class="row"><strong>${esc(q.title)}</strong><span class="pill">${esc(q.account)}</span></div><p class="muted">${esc(q.status)}</p><textarea readonly>${esc(q.prompt)}</textarea><div class="actions"><button data-copyq="${i}">Salin prompt</button><button data-done="${i}">Tandai selesai</button><button class="danger" data-rmq="${i}">Hapus</button></div></div>`).join(''):'Belum ada prompt dalam antrean.';
+ document.querySelectorAll('[data-copyq]').forEach(b=>b.onclick=()=>copy(state.queue[+b.dataset.copyq].prompt));
+ document.querySelectorAll('[data-done]').forEach(b=>b.onclick=()=>{state.queue[+b.dataset.done].status='Selesai (ditandai manual)';save()});
+ document.querySelectorAll('[data-rmq]').forEach(b=>b.onclick=()=>{state.queue.splice(+b.dataset.rmq,1);save()});
+}
+function addQueue(title,prompt){const account=state.accounts[state.selectedAccount]?.label||'Akun Flow';state.queue.push({title,prompt,account,status:'Siap dibuka di Flow'});save()}
+async function copy(s){try{await navigator.clipboard.writeText(s);alert('Tersalin.')}catch(e){alert('Clipboard tidak tersedia. Pilih dan salin teks secara manual.')}}
+
+function sceneCard(title,prompt,i){return `<div class="scene"><strong>${esc(title)}</strong><textarea readonly>${esc(prompt)}</textarea><div class="actions"><button data-scenes-copy="${i}">Salin prompt scene</button><button data-scenes-queue="${i}">Masukkan antrean Flow</button></div></div>`}
+function bindSceneButtons(list){list.forEach((s,i)=>{const c=document.querySelectorAll('[data-scenes-copy]')[i],q=document.querySelectorAll('[data-scenes-queue]')[i];if(c)c.onclick=()=>copy(s.prompt);if(q)q.onclick=()=>addQueue(s.title,s.prompt)})}
+$('makeUgc').onclick=()=>{
+ const product=$('ugcProduct').value.trim(),style=$('ugcStyle').value,aud=$('ugcAudience').value,dur=$('ugcDuration').value,benefits=$('ugcBenefits').value;
+ if(!product)return alert('Isi produk/layanan.');
+ const script=`Buat video UGC ${dur} bergaya ${style} untuk ${product}. Audiens: ${aud||'umum'}. Poin manfaat yang boleh disampaikan: ${benefits||'jelaskan manfaat secara wajar tanpa klaim yang tidak terverifikasi'}. Struktur: hook kuat, masalah/kebutuhan, demonstrasi atau pengalaman, ringkasan manfaat, CTA. Gunakan bahasa natural seperti kreator sungguhan, hindari klaim medis/keuangan atau janji berlebihan.`;
+ const scenes=[{title:'Scene 1 – Hook',prompt:`UGC video, creator speaking directly to camera, natural expressive delivery. Hook: perkenalkan kebutuhan/masalah yang relevan untuk ${product}. Setting rapi dan autentik, close-medium shot, soft natural light. Vertical 9:16.`},{title:'Scene 2 – Demo',prompt:`UGC product demonstration for ${product}. Show product clearly, demonstrate: ${benefits||'fitur utama yang benar-benar tersedia'}. Hands and product details in focus, realistic movement, clean background. Vertical 9:16.`},{title:'Scene 3 – Benefit & CTA',prompt:`UGC creator summarizes realistic benefits of ${product} for ${aud||'general audience'} and gives a clear CTA: ${benefits||'cek detail produk'}. Friendly authentic tone, direct-to-camera, end card composition. Vertical 9:16.`}];
+ generated.ugc={script,scenes};$('ugcOutput').classList.remove('hidden');$('ugcScript').innerHTML=`<p>${esc(script)}</p>`;$('ugcScenes').innerHTML=scenes.map((s,i)=>sceneCard(s.title,s.prompt,i)).join('');bindSceneButtons(scenes);
+};
+$('copyUgc').onclick=()=>copy([generated.ugc.script,...generated.ugc.scenes.map(s=>s.prompt)].join('\n\n'));
+$('saveUgc').onclick=()=>saveGenerated('UGC',generated.ugc);
+$('makeYt').onclick=()=>{
+ const topic=$('ytTopic').value.trim();if(!topic)return alert('Isi topik video.');
+ const dur=$('ytDuration').value,tone=$('ytTone').value,format=$('ytFormat').value,notes=$('ytNotes').value;
+ const chapters=['Pembuka & hook','Konteks / latar belakang','Poin utama 1','Poin utama 2','Poin utama 3','Kesimpulan & CTA'];
+ const script=`Buat naskah YouTube ${dur} tentang "${topic}" dengan gaya ${tone}. Target audiens dan poin wajib: ${notes||'penonton umum; jelaskan secara runtut dan akurat'}. Susun hook 15 detik, pengantar, bab utama dengan transisi, rangkuman, dan CTA. Tambahkan saran B-roll dan teks layar. Jangan mengarang fakta; tandai bagian yang perlu diverifikasi.`;
+ const scenes=chapters.map((ch,i)=>({title:`${i+1}. ${ch}`,prompt:`Visual scene ${i+1} untuk video YouTube tentang "${topic}". Bagian: ${ch}. Buat visual sinematik yang mendukung narasi, komposisi jelas, tanpa teks acak atau watermark, konsisten dengan gaya ${tone}. Format ${format}. Catatan: ${notes||'visual informatif dan relevan'}.`}));
+ generated.yt={script,scenes};$('ytOutput').classList.remove('hidden');$('ytScript').innerHTML=`<p>${esc(script)}</p><p class="muted">Bab: ${chapters.join(' · ')}</p>`;$('ytScenes').innerHTML=scenes.map((s,i)=>sceneCard(s.title,s.prompt,i)).join('');bindSceneButtons(scenes);
+};
+$('copyYt').onclick=()=>copy([generated.yt.script,...generated.yt.scenes.map(s=>s.prompt)].join('\n\n'));
+$('saveYt').onclick=()=>saveGenerated('YouTube',generated.yt);
+$('makeMotion').onclick=()=>{
+ const subject=$('mcSubject').value.trim(),move=$('mcMove').value.trim();if(!subject||!move)return alert('Isi subjek dan gerakan referensi.');
+ const prompt=`MOTION TRANSFER / MOTION CONTROL VIDEO. Use the provided character image as the visual identity source and the provided reference video as the motion source. Subject: ${subject}. Transfer the reference movement accurately while preserving the subject's identity, face, hairstyle, body proportions, clothing, and accessories across every frame. Requested movement: ${move}. Environment/background: ${$('mcScene').value||'simple clean studio background'}. Camera: full-body framing, stable camera, subject fully visible, no cropping of hands or feet. Duration: ${$('mcLength').value}. Aspect ratio: ${$('mcRatio').value}. Consistency: ${$('mcConsistency').value||'keep identity and outfit unchanged'}. Natural anatomy, smooth temporal consistency, realistic contact and balance, no extra limbs, no flicker, no morphing, no scene cuts.`;
+ generated.motion=prompt;$('motionOutput').classList.remove('hidden');$('motionPrompt').value=prompt;
+};
+$('copyMotion').onclick=()=>copy(generated.motion||'');
+$('saveMotion').onclick=()=>saveGenerated('Motion Control',{script:generated.motion,scenes:[{title:'Motion Control prompt',prompt:generated.motion}]});
+function saveGenerated(type,data){const p=active();if(!p)return alert('Buat atau aktifkan proyek di Dashboard terlebih dahulu.');p.scenes=[...(p.scenes||[]),{type,created:new Date().toISOString(),...data}];save();alert('Hasil ditambahkan ke proyek aktif.')}
+$('exportBackup').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});download(blob,'ai-motion-studio-backup.json')};
+$('importBackup').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const x=JSON.parse(await f.text());if(!x.projects||!x.accounts)throw Error('format');state={...state,...x};save();renderAccounts();alert('Cadangan berhasil diimpor.')}catch(err){alert('File cadangan tidak valid.')}};
+function download(blob,name){const a=document.createElement('a');const u=URL.createObjectURL(blob);a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000)}
+$('clipsInput').onchange=e=>{clips=[...clips,...[...e.target.files].map(file=>({file,name:file.name}))];renderClips()};
+function renderClips(){$('clipList').innerHTML=clips.map((c,i)=>`<div class="scene"><div class="row"><span>${i+1}. ${esc(c.name)}</span><span class="actions"><button data-up="${i}">↑</button><button data-down="${i}">↓</button><button class="danger" data-remove="${i}">×</button></span></div></div>`).join('');document.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>{let i=+b.dataset.up;if(i>0){[clips[i-1],clips[i]]=[clips[i],clips[i-1]];renderClips()}});document.querySelectorAll('[data-down]').forEach(b=>b.onclick=()=>{let i=+b.dataset.down;if(i<clips.length-1){[clips[i+1],clips[i]]=[clips[i],clips[i+1]];renderClips()}});document.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{clips.splice(+b.dataset.remove,1);renderClips()})}
+$('clearClips').onclick=()=>{clips=[];renderClips();$('clipsInput').value=''};
+$('mergeClips').onclick=async()=>{
+ if(!clips.length)return alert('Pilih minimal satu klip.');
+ const status=$('exportStatus'),bar=$('exportProgress');status.textContent='Memuat FFmpeg WebAssembly…';bar.style.width='5%';$('mergeClips').disabled=true;
+ try{
+  const {FFmpeg}=await import('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js');
+  const {toBlobURL}=await import('https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/esm/index.js');
+  const ff=new FFmpeg();ff.on('progress',({progress})=>{bar.style.width=Math.max(5,Math.min(95,Math.round(progress*90+5)))+'%';status.textContent='Memproses video… '+Math.round(progress*100)+'%'});
+  const base='https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd';
+  await ff.load({coreURL:await toBlobURL(base+'/ffmpeg-core.js','text/javascript'),wasmURL:await toBlobURL(base+'/ffmpeg-core.wasm','application/wasm')});
+  const args=[];for(let i=0;i<clips.length;i++){const ext=(clips[i].name.split('.').pop()||'mp4').replace(/[^a-z0-9]/gi,'');const fname=`input${i}.${ext}`;await ff.writeFile(fname,new Uint8Array(await clips[i].file.arrayBuffer()));args.push('-i',fname)}
+  const [w,h]=$('exportRatio').value.split('x');let filters='';
+  clips.forEach((_,i)=>{filters+=`[${i}:v]scale=${w}:${h}:force_original_aspect_ratio=decrease,pad=${w}:${h}:(ow-iw)/2:(oh-ih)/2,fps=30,setsar=1,format=yuv420p[v${i}];`});
+  filters+=clips.map((_,i)=>`[v${i}]`).join('')+`concat=n=${clips.length}:v=1:a=0[outv]`;
+  const out='final-output.mp4';await ff.exec([...args,'-filter_complex',filters,'-map','[outv]','-an','-c:v','libx264','-preset','ultrafast','-crf','26','-movflags','+faststart',out]);
+  const data=await ff.readFile(out);download(new Blob([data.buffer],{type:'video/mp4'}),$('exportName').value.trim()||'hasil.mp4');bar.style.width='100%';status.innerHTML='<span class="good">Ekspor selesai.</span> Video berhasil dibuat (tanpa audio).';
+  await ff.terminate();
+ }catch(err){console.error(err);status.innerHTML='<span class="warn">Ekspor gagal.</span> '+esc(err?.message||String(err))+'<br>Coba kurangi durasi/resolusi, tutup tab lain, atau gunakan klip MP4 pendek.'}
+ finally{$('mergeClips').disabled=false}
+};
+load();renderProjects();renderAccounts();renderQueue();
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script>
+</body></html>

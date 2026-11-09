@@ -1,0 +1,9 @@
+{
+  "name": "AI Motion Studio Automator",
+  "short_name": "AI Motion Studio",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0b0e14",
+  "theme_color": "#10131b",
+  "description": "Studio produksi video AI berbasis Flow untuk Android"
+}
